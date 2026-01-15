@@ -12,7 +12,12 @@ import { movies } from "../utils/movieData.js";
 const createMovies = asyncHandler(async(req,res)=>{
     const {title,description,rating , duration, releaseDate, imdbId} = req.body
 
-    const posterLocalPath  = req.files?.poster
+    console.log(req.file);
+    console.log(req.body);
+    
+    
+
+    const posterLocalPath  = req.file?.path
 
     if(!posterLocalPath) {
         throw new ApiError(400 , "Poster is required for movie displaying")
@@ -102,13 +107,13 @@ const editMovieDetails = asyncHandler(async(req,res)=>{
         throw new ApiError(400 , "Movie not found")
     }
 
-    if(movie?.createdBy.toString() !== req.user?._id.toString()){
-        throw new ApiError(400 , "You are not Authorized to edit the movie details")
-    }
+    // if(movie?.createdBy.toString() !== req.user?._id.toString()){
+    //     throw new ApiError(400 , "You are not Authorized to edit the movie details")
+    // }
 
     const {title , description , rating } = req.body
 
-    const posterLocalPath = req.files?.poster
+    const posterLocalPath = req.file?.path
 
     if(!posterLocalPath){
         throw new ApiError(400 , "Poster is required")
@@ -181,18 +186,18 @@ const getAllMovies = asyncHandler(async(req,res)=>{
 
 const searchMovies = asyncHandler(async(req,res)=>{
 
-    const {q ,  page=1 , limit=10} = req.query
+    const {search ,  page=1 , limit=10} = req.query
 
-    if(!q || q.trim()===""){
-        throw new ApiError(402 , "Search query is required to search a movie")
-    }
+    // if(!search || search.trim()===""){
+    //     throw new ApiError(404 , "Search query is required to search a movie")
+    // }
 
     const skip = (page-1) * 10
 
     const filter = {
         $or : [
-            {title : {$regex : q , $options : 'i'}},
-            {description : {$regex : q , $options: 'i'}}
+            {title : {$regex : search , $options : 'i'}},
+            {description : {$regex : search , $options: 'i'}}
         ]
     }
 
@@ -209,6 +214,7 @@ const searchMovies = asyncHandler(async(req,res)=>{
     const fetchedMovies = {
         total,
         currentPage : Number(page),
+        totalPages : Math.ceil(total/limit),
         limit : Number(limit),
         movies
     }
@@ -263,6 +269,24 @@ const sortedMovies = asyncHandler(async(req,res)=>{
     )
 }) 
 
+const singleMovie = asyncHandler(async(req,res)=>{
+    const {movieId} = req.params;
+
+    if(!isValidObjectId(movieId)){
+        throw new ApiError(404 , "Invalid movie Id")
+    }
+
+    const movie = await Movie.findById(movieId)
+
+    if(!movie){
+        throw new ApiError(404 , "No movie found")
+    }
+
+    return res.json(
+        new ApiResponse(200 , movie , "Movie fetched using its id")
+    )
+})
+
 const loadIMDBMovies = asyncHandler(async(req,res)=>{
 
 
@@ -291,4 +315,4 @@ const loadIMDBMovies = asyncHandler(async(req,res)=>{
 
 })
 
-export {createMovies , deleteMovie , editMovieDetails , getAllMovies , searchMovies , sortedMovies , loadIMDBMovies}
+export {createMovies , deleteMovie , editMovieDetails , getAllMovies , searchMovies , sortedMovies , loadIMDBMovies,singleMovie}

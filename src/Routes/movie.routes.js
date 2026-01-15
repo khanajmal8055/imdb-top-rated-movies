@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { verifyJwt } from "../Middlewares/auth.middleware.js";
 import { isAdmin } from "../Middlewares/admin.middleware.js";
-import { createMovies, deleteMovie, editMovieDetails, getAllMovies, loadIMDBMovies, searchMovies, sortedMovies } from "../Controllers/movie.controllers.js";
+import { createMovies, deleteMovie, editMovieDetails, getAllMovies, loadIMDBMovies, searchMovies, singleMovie, sortedMovies } from "../Controllers/movie.controllers.js";
 import { upload } from "../Middlewares/multer.middleware.js";
 
 
@@ -16,5 +16,6 @@ router.route('/add-movies').post(verifyJwt,isAdmin , upload.single("poster") , c
 router.route('/edit-movies/:movieId').put(verifyJwt,isAdmin,upload.single("poster") , editMovieDetails)
 router.route('/delete-movies/:movieId').delete(verifyJwt,isAdmin,deleteMovie)
 router.route('/load-movies').post(verifyJwt,isAdmin,loadIMDBMovies)
+router.route('/movie-details/:movieId').get(singleMovie)
 
 export default router 
