@@ -5,7 +5,11 @@ import { User } from "../Models/user.models.js"
 
 export const verifyJwt = asyncHandler(async(req,res,next)=>{
     try {
-        const token = req.cookies?.accessToken || req.header("Authorization").replace("Bearer","")
+        
+        const authHeader = req.header("Authorization")
+        
+        const token = req.cookies?.accessToken || 
+                        (authHeader?.startsWith("Bearer ")? authHeader.split(" ")[1] : null)
 
         if(!token){
             throw new ApiError(400 , "You are not Authorized User")
@@ -28,6 +32,7 @@ export const verifyJwt = asyncHandler(async(req,res,next)=>{
     } 
     catch (error) {
         console.log("Invalid Access Token" , error);
+        next(error)
         
     }
 })
