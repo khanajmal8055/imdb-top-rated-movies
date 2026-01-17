@@ -252,7 +252,7 @@ const sortedMovies = asyncHandler(async(req,res)=>{
     const total = await Movie.countDocuments()
 
     const fetchedMovies = {
-        total,
+        totalPages : Math.ceil(total/limit),
         page : Number(page),
         limit : Number(limit),
         sortBy,
